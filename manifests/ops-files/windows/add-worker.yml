@@ -1,0 +1,117 @@
+- type: replace
+  path: /stemcells/-
+  value:
+    alias: windows
+    os: windows1803
+    version: latest
+
+- type: replace
+  path: /releases/-
+  value:
+    name: "windows-utilities"
+    version: "0.11.0"
+    url: "https://bosh.io/d/github.com/cloudfoundry-incubator/windows-utilities-release?v=0.11.0"
+    sha1: "efc10ac0f4acae23637ce2c6f864d20df2e3a781"
+
+- type: replace
+  path: /addons/-
+  value:
+    name: bosh-dns-windows
+    include:
+      stemcell:
+      - os: windows1803
+    jobs:
+    - name: bosh-dns-windows
+      release: bosh-dns
+      properties:
+        api:
+          client:
+            tls: ((/dns_api_client_tls))
+          server:
+            tls: ((/dns_api_server_tls))
+        cache:
+          enabled: true
+        health:
+          client:
+            tls: ((/dns_healthcheck_client_tls))
+          enabled: true
+          server:
+            tls: ((/dns_healthcheck_server_tls))
+
+- type: replace
+  path: /addons/-
+  value:
+    name: set-pw
+    include:
+      stemcell:
+      - os: windows1803
+    jobs:
+    - name: enable_rdp
+      release: windows-utilities
+      properties:
+        enable_rdp:
+          enabled: true
+    - name: set_password
+      release: windows-utilities
+      properties:
+        set_password:
+          password: ((windows-rdp-password))
+
+- type: replace
+  path: /instance_groups/-
+  value:
+    name: windows-worker
+    instances: 3
+    azs:
+    - z1
+    - z2
+    - z3
+    networks:
+    - name: default
+    stemcell: windows
+    vm_extensions:
+    - 100GB_ephemeral_disk
+    vm_type: medium
+    jobs:
+    - name: kubelet-windows
+      properties:
+        api-token: ((kubelet-password))
+        kubelet-configuration:
+          kind: KubeletConfiguration
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          authentication:
+            anonymous:
+              enabled: false
+            x509:
+              clientCAFile: C:\var\vcap\jobs\kubelet-windows\config\kubelet-client-ca.pem
+          authorization:
+            mode: Webhook
+          clusterDNS:
+            - 10.100.200.10
+          clusterDomain: cluster.local
+          failSwapOn: false
+          readOnlyPort: 0
+          serializeImagePulls: false
+          tlsCertFile: C:\var\vcap\jobs\kubelet-windows\config\kubelet.pem
+          tlsPrivateKeyFile: C:\var\vcap\jobs\kubelet-windows\config\kubelet-key.pem
+          cgroupsPerQOS: false
+          enforceNodeAllocatable: []
+        drain-api-token: ((kubelet-drain-password))
+        k8s-args:
+          allow-privileged: false
+          cni-bin-dir: C:\var\vcap\jobs\kubelet-windows\packages\cni-windows\bin
+          container-runtime: docker
+          image-pull-progress-deadline: 20m
+          keep-terminated-pod-volumes: false
+          kubeconfig: C:\var\vcap\jobs\kubelet-windows\config\kubeconfig
+          network-plugin: cni
+          pod-infra-container-image: kubeletwin/pause
+          resolv-conf: ""
+        tls:
+          kubelet: ((tls-kubelet))
+          kubelet-client-ca:
+            certificate: ((tls-kubelet-client.ca))
+          kubernetes: ((tls-kubernetes))
+      release: kubo
+    - name: flanneld-windows
+      release: kubo
