@@ -71,7 +71,7 @@
     stemcell: windows
     vm_extensions:
     - 100GB_ephemeral_disk
-    vm_type: medium
+    vm_type: worker
     jobs:
     - name: kubelet-windows
       properties:
