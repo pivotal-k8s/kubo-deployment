@@ -87,3 +87,17 @@
       release: kubo
     - name: flanneld-windows
       release: kubo
+    - name: kube-proxy-windows
+      properties:
+        api-token: ((kube-proxy-password))
+        tls:
+          kubernetes: ((tls-kubernetes))
+        kube-proxy-configuration:
+          apiVersion: kubeproxy.config.k8s.io/v1alpha1
+          kind: KubeProxyConfiguration
+          clusterCIDR: 10.200.0.0/16
+          clientConnection:
+            kubeconfig: /var/vcap/jobs/kube-proxy/config/kubeconfig
+          mode: kernelspace
+          portRange: ""
+      release: kubo
