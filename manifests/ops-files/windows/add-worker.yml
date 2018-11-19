@@ -77,6 +77,7 @@
           kubeconfig: C:\var\vcap\jobs\kubelet-windows\config\kubeconfig
           network-plugin: cni
           pod-infra-container-image: kubeletwin/pause
+          register-with-taints: windows=1803:NoSchedule
           resolv-conf: ""
         tls:
           kubelet: ((tls-kubelet))
