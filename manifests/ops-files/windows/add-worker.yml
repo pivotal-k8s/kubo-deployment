@@ -97,7 +97,7 @@
           kind: KubeProxyConfiguration
           clusterCIDR: 10.200.0.0/16
           clientConnection:
-            kubeconfig: /var/vcap/jobs/kube-proxy/config/kubeconfig
+            kubeconfig: /var/vcap/jobs/kube-proxy-windows/config/kubeconfig
           mode: kernelspace
           portRange: ""
       release: kubo
